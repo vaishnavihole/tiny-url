@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import shortId from 'shortid';
 
 import UrlShorts from './models/UrlShorts.js';
 
@@ -29,6 +30,24 @@ app.get('/shortUrls', async (req, res) => {
     })
  
  })
+
+ app.post('/shortUrls', async (req, res) => {
+    const { full } = req.body;
+
+    const newUrl  = new UrlShorts({
+      full,
+    })
+
+    const savedUrls = await newUrl.save();
+
+    res.json({
+        success: true,
+       message: "shortUrls created successfully",
+       data: savedUrls
+        
+ })
+})
+ 
 
 app.listen(PORT, () => {
     console.log(`Server started listening on ${PORT}`);
