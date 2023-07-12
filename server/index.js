@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import shortId from 'shortid';
 
-import UrlShorts from './models/UrlShorts.js';
-
+import UrlRecord from './models/UrlRecord.js';
 
 dotenv.config();
 
@@ -20,34 +19,50 @@ async function connectDB() {
 }
 connectDB();
 
-app.get('/shortUrls', async (req, res) => {
-    const shortUrls =  await UrlShorts.find();
+app.post('/UrlRecord', async (req, res) => {
+    const { url } = req.body;
 
-    res.json({
-      success: true,
-      message: "shortUrls fetched successfully",
-      data: shortUrls
-    })
- 
- })
-
- app.post('/shortUrls', async (req, res) => {
-    const { full } = req.body;
-
-    const newUrl  = new UrlShorts({
-      full,
+    const urlRecord = new UrlRecord({
+        fullUrl: url,
+        shortUrl: shortId()
     })
 
-    const savedUrls = await newUrl.save();
-
+    const result = await urlRecord.save();
     res.json({
         success: true,
-       message: "shortUrls created successfully",
-       data: savedUrls
-        
- })
+        data: result,
+        message: 'Short url created successfully'
+    })
 })
- 
+
+app.get('/:shortUrl', async (req, res) => {
+
+    const {shortUrl} = req.params;
+
+    const urlRecord = await UrlRecord.findOne({shortUrl});
+
+
+    urlRecord.visitCount = urlRecord.visitCount + 1;
+
+    await urlRecord.save();
+
+    
+    res.redirect(urlRecord.fullUrl);
+})
+
+app.put('/UrlRecord/:shortUrl', async (req, res) => {
+
+    const {shortUrl} = req.params;
+    const {newShortUrl} = req.body;
+
+   await UrlRecord.updateOne({shortUrl}, {$set: {shortUrl: newShortUrl}});
+
+   res.json({
+    success: true,
+    message: 'UrlRecord updated successfully'
+})
+})
+
 
 app.listen(PORT, () => {
     console.log(`Server started listening on ${PORT}`);
