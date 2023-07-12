@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
+import UrlShorts from './models/UrlShorts.js';
+
 
 dotenv.config();
 
@@ -16,6 +18,17 @@ async function connectDB() {
     }
 }
 connectDB();
+
+app.get('/shortUrls', async (req, res) => {
+    const shortUrls =  await UrlShorts.find();
+
+    res.json({
+      success: true,
+      message: "shortUrls fetched successfully",
+      data: shortUrls
+    })
+ 
+ })
 
 app.listen(PORT, () => {
     console.log(`Server started listening on ${PORT}`);
